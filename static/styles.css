@@ -1,0 +1,15 @@
+.container {
+    margin: 50px auto;
+}
+
+.container>form {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.container>form>* {
+    width: 300px;
+    padding: 5px;
+}
