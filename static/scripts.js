@@ -18,10 +18,10 @@ window.onload = () => {
             })
             .then(function (myJson) {
                 myJson.forEach(function (channel) {
-                    document.getElementById("table").insertAdjacentElement('beforeend', `<tr><td>channel['id']</td><td>channel['channel']</td><td>channel['whitelist']</td></tr>`})
-                console.log(JSON.stringify(myJson));
+                    document.getElementById("table").insertAdjacentHTML('beforeend', `<tr><td>${channel['id']}</td><td>${channel['channel']}</td><td>${channel['whitelist']}</td></tr>`)
             });
     })
+});
 }
 
 // postData('http://example.com/answer', {

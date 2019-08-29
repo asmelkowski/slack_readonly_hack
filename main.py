@@ -1,14 +1,8 @@
-import os
 import sqlite3
-import time
-import requests
-import json
 
-from dotenv import load_dotenv
-from flask import Flask, render_template, request, g, Response, jsonify
+from flask import Flask, render_template, request, g, Response, jsonify, redirect
 
 app = Flask(__name__)
-load_dotenv()
 # Load API KEY stored in .env file (not ment for git tracking)
 DATABASE = 'database.db'
 
@@ -26,40 +20,55 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-
-with app.app_context():
-    get_db().execute('''
-        CREATE TABLE IF NOT EXISTS channels (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                                                channel TEXT,
-                                                whitelist TEXT);
-        ''')
-SLACK_API_KEY = os.getenv('SLACK_API_KEY')
-base_url = 'https://slack.com/api/'
-
+def create_table():
+    with app.app_context():
+        get_db().execute('''
+            CREATE TABLE IF NOT EXISTS channels (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                                                    channel TEXT,
+                                                    whitelist TEXT);
+            ''')
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    all_data_dict = get_all_data_from_db()
+    return render_template('index.html', all_data_dict=all_data_dict)
 
 
 @app.route('/channels', methods=['GET', 'POST'])
 def handle_data():
     if request.method == 'POST':
         try:
-            data = request.get_json()
-            print(
-                f"Channel is: {data['channel']}, Whitelist is: {data['whitelist']}")
-            conn = get_db()
-            conn.row_factory = sqlite3.Row
-            cur = conn.cursor()
-            cur.execute('''
-                INSERT INTO channels (channel, whitelist)
-                VALUES (?,?)''', (data['channel'], data['whitelist']))
-            conn.commit()
-            return request.get_json()
+            with app.app_context():
+                data = request.get_json()
+                conn = get_db()
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+                cur.execute('''
+                    INSERT INTO channels (channel, whitelist)
+                    VALUES (?,?)''', (data['channel'], data['whitelist']))
+                conn.commit()
+                return request.get_json()
         except Exception as e:
             print(e)
     elif request.method == 'GET':
+        create_table()
+        all_data_dict = get_all_data_from_db()
+        return jsonify(all_data_dict)
+
+@app.route('/delete/<id>', methods=['GET'])
+def delete_row(id):
+    with app.app_context():
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute('''
+                    DELETE FROM channels WHERE id=? 
+                    ''', (id,))
+        conn.commit()
+    return redirect('/')
+
+def get_all_data_from_db():
+    with app.app_context():
+        create_table()
         conn = get_db()
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
@@ -67,37 +76,16 @@ def handle_data():
                     SELECT * FROM channels
                     ''')
         all_data = cur.fetchall()
-        all_data_dict = []
-        for row in all_data:
-            channel = {
-                'id': row['id'],
-                'channel': row['channel'],
-                'whitelist': row['whitelist'].split(',')
-            }
-            all_data_dict.append(channel)
-        return jsonify(all_data_dict)
+    all_data_dict = []
+    for row in all_data:
+        channel = {
+            'id': row['id'],
+            'channel': row['channel'],
+            'whitelist': row['whitelist'].split(',')
+        }
+        all_data_dict.append(channel)
+    return all_data_dict
 
-
-def delete_messages(channel_list, whitelisted_users):
-    for channel in channel_list:
-        messages_history = requests.get(f"{base_url}conversations.history", params={
-            'token': SLACK_API_KEY,
-            'channel': channel
-        })
-        for message in messages_history.json()['messages']:
-            try:
-                if message['user'] not in whitelisted_users:
-                    delete_request = requests.post(f"{base_url}chat.delete", data={
-                        'token': SLACK_API_KEY,
-                        'channel': channel,
-                        'ts': message['ts']
-                    })
-            except KeyError:
-                print(f"No user was found in message {message['ts']}")
-
-# while True:
-#     delete_messages(['CMSN6JXL4'], whitelisted_users)
-#     time.sleep(5)
 
 
 if __name__ == "__main__":
