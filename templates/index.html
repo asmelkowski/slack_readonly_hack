@@ -34,7 +34,28 @@
             </tr>
             {% endfor %}
         </table>
+        <button id="run_app">Run the app</button>
+        <button id="stop_app">Stop the app</button>
+        <h1 id="app_state"></h1>
     </div>
+    <h1>Authorized workspaces:</h1>
+    <ol>
+        {% for workspace in workspaces %}
+            <li>{{ workspace[0] }} ---- {{ workspace[1] }} ---- {{ workspace[2] }}</li>
+        {% endfor %}
+    </ol>
+    <h1>Channel list:</h1>
+    <ol>
+        {% for conv in conversations %}
+            <li>{{ conv[0] }} ---- {{ conv[1] }}</li>
+        {% endfor %}
+    </ol>
+    <h1>Users list:</h1>
+    <ol>
+        {% for user in users %}
+            <li>{{ user[0] }} ---- {{ user[1] }}</li>
+        {% endfor %}
+    </ol>
 </body>
 
 </html>

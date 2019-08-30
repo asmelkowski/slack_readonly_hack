@@ -1,4 +1,12 @@
 window.onload = () => {
+    fetch('/state')
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (myJson) {
+            document.getElementById("app_state").innerText = `App is ${myJson['current_state']}`
+        })
+
     var submit = document.getElementById('submit-btn');
     submit.addEventListener('click', function () {
         let channel = document.forms[0][0].value;
@@ -19,9 +27,23 @@ window.onload = () => {
             .then(function (myJson) {
                 myJson.forEach(function (channel) {
                     document.getElementById("table").insertAdjacentHTML('beforeend', `<tr><td>${channel['id']}</td><td>${channel['channel']}</td><td>${channel['whitelist']}</td></tr>`)
-            });
+                });
+            })
+    });
+    let run_btn = document.getElementById("run_app")
+    run_btn.addEventListener('click', () => {
+        postData('state', data = {
+            'set_state': 'on'
+        })
+        document.getElementById("app_state").innerText = "App is on";
     })
-});
+    let stop_btn = document.getElementById("stop_app")
+    stop_btn.addEventListener('click', () => {
+        postData('state', data = {
+            'set_state': 'off'
+        })
+        document.getElementById("app_state").innerText = "App is off";
+    })
 }
 
 // postData('http://example.com/answer', {
@@ -46,4 +68,5 @@ function postData(url = '', data = {}) {
             body: JSON.stringify(data), // body data type must match "Content-Type" header
         })
         .then(response => response.json()); // parses JSON response into native JavaScript objects 
+    alert(response);
 }
