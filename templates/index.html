@@ -11,15 +11,29 @@
 </head>
 
 <body>
+    <header>
+        <h1>Slack read only hack</h1>
+        <h2><a target='_blank' href="https://{{ workspaces.domain }}.slack.com">{{ workspaces.name }}</a></h2>
+    </header>
     <div class="container">
-        <form>
+        <form id="add_channel" class="panel" action="channels" method="POST">
             <label for="channel">Chanel id</label>
-            <input type="text" name="channels" placeholder="Chanel id" />
+            <input type="text" name="channels" placeholder="Chanel id" list='channel_list' required/>
+            <datalist id="channel_list">
+                {% for channel in channels %}
+                <option value="{{ channel.id }}">{{ channel.name }}</option>
+                {% endfor %}
+            </datalist>
             <label for="whitelist">List of whitedlisted users (separated with comma)</label>
-            <input type="text" name="whitelist" placeholder="Whitelisted users ids (comma separated)" />
+            <input type="text" name="whitelist" placeholder="Whitelisted users ids (comma separated)" list='users_list'/>
+            <datalist id="users_list">
+                    {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.name }}</option>
+                    {% endfor %}
+                </datalist>
+            <button type="submit" id='submit-btn'>Add</button>
         </form>
-        <button id='submit-btn'>Add</button>
-        <table id="table">
+        <table class="panel" id="table">
             <tr>
                 <th>id</th>
                 <th>Channel id</th>
@@ -34,28 +48,30 @@
             </tr>
             {% endfor %}
         </table>
-        <button id="run_app">Run the app</button>
-        <button id="stop_app">Stop the app</button>
+        <div id="app-control-container" class="panel">
+            <button id="run_app">Run the app</button>
+            <button id="stop_app">Stop the app</button>
+        </div>
         <h1 id="app_state"></h1>
     </div>
-    <h1>Authorized workspaces:</h1>
-    <ol>
-        {% for workspace in workspaces %}
-            <li>{{ workspace[0] }} ---- {{ workspace[1] }} ---- {{ workspace[2] }}</li>
-        {% endfor %}
-    </ol>
-    <h1>Channel list:</h1>
-    <ol>
-        {% for conv in conversations %}
-            <li>{{ conv[0] }} ---- {{ conv[1] }}</li>
-        {% endfor %}
-    </ol>
-    <h1>Users list:</h1>
-    <ol>
-        {% for user in users %}
-            <li>{{ user[0] }} ---- {{ user[1] }}</li>
-        {% endfor %}
-    </ol>
+    <section id="lists">
+        <div id="channels-list">
+            <h1>Channel list:</h1>
+            <ol>
+                {% for channel in channels %}
+                    <li><strong>Name:</strong> {{ channel.name }} <strong>ID:</strong> {{ channel.id }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+        <div id="users-list">   
+            <h1>Users list:</h1>
+            <ol>
+                {% for user in users %}
+                    <li><strong>Name:</strong> {{ user.name }} <strong>ID:</strong> {{ user.id }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+    </section>
 </body>
 
 </html>

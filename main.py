@@ -10,7 +10,7 @@ app = Flask(__name__)
 # Load API KEY stored in .env file (not ment for git tracking)
 DATABASE = 'database.db'
 process = None
-state = None
+state = 'off'
 
 load_dotenv()
 # Load API KEY stored in .env file (not ment for git tracking)
@@ -46,50 +46,58 @@ def create_table():
 
 @app.route('/')
 def index():
-    workspace_users = requests.get(f"{base_url}users.list", params={
-        'token': SLACK_API_KEY
-    }).json()
-    users_name_list = [x['real_name'] for x in workspace_users['members']]
-    users_id_list = [x['id'] for x in workspace_users['members']]
-    workspace_users = zip(users_id_list, users_name_list)
-    auth_workspaces = requests.get(f"{base_url}team.info", params={
-        'token': SLACK_API_KEY
-    }).json()
-    if type(auth_workspaces['team']) == dict:
-        workspaces_ids = [auth_workspaces['team']['id']]
-        workspaces_names = [auth_workspaces['team']['name']]
-        workspaces_domains = [auth_workspaces['team']['domain']]
-        auth_workspaces = zip(workspaces_ids, workspaces_names, workspaces_domains)
-    elif type(auth_workspaces['team']) == list:
-        workspaces_ids = [x['id'] for x in auth_workspaces['team']]
-        workspaces_names = [x['name'] for x in auth_workspaces['team']]
-        workspaces_domains = [x['domain'] for x in auth_workspaces['team']]
-        auth_workspaces = zip(workspaces_ids, workspaces_names, workspaces_domains)
+    try:
+        workspace_users = requests.get(f"{base_url}users.list", params={
+            'token': SLACK_API_KEY
+        }).json()
+        users_name_list = [x['name'] for x in workspace_users['members']]
+        users_id_list = [x['id'] for x in workspace_users['members']]
+        workspace_users = zip(users_id_list, users_name_list)
+        users_dict = []
+        for id, name in workspace_users:
+            users_dict.append({
+                'id': id,
+                'name': name
+            })
 
-    conversation_list = requests.get(f"{base_url}conversations.list", params={
-        'token': SLACK_API_KEY
-    }).json()
-    channels_ids = [x['id'] for x in conversation_list['channels']]
-    channels_names = [x['name'] for x in conversation_list['channels']]
-    conversation_list = zip(channels_ids, channels_names)
-    all_data_dict = get_all_data_from_db()
-    return render_template('index.html', all_data_dict=all_data_dict, workspaces=auth_workspaces, conversations=conversation_list, users=workspace_users)
+        auth_workspaces = requests.get(f"{base_url}team.info", params={
+            'token': SLACK_API_KEY
+        }).json()['team']
 
+        conversation_list = requests.get(f"{base_url}conversations.list", params={
+            'token': SLACK_API_KEY
+        }).json()
+        channels_ids = [x['id'] for x in conversation_list['channels']]
+        channels_names = [x['name'] for x in conversation_list['channels']]
+        conversation_list = zip(channels_ids, channels_names)
+        channels_dict = []
+        for id, name in conversation_list:
+            channels_dict.append({
+                'id': id,
+                'name': name
+            })
+        all_data_dict = get_all_data_from_db()
+        return render_template('index.html', all_data_dict=all_data_dict, workspaces=auth_workspaces, channels=channels_dict, users=users_dict)
+    except KeyError as e:
+        return jsonify({
+            'error': f"KeyError: {e}. Check Your .env file"
+        })
 
 @app.route('/channels', methods=['GET', 'POST'])
 def handle_data():
     if request.method == 'POST':
         try:
             with app.app_context():
-                data = request.get_json()
+                channel = request.form['channels']
+                whitelist = request.form['whitelist']
                 conn = get_db()
                 conn.row_factory = sqlite3.Row
                 cur = conn.cursor()
                 cur.execute('''
                     INSERT INTO channels (channel, whitelist)
-                    VALUES (?,?)''', (data['channel'], data['whitelist']))
+                    VALUES (?,?)''', (channel, whitelist))
                 conn.commit()
-                return request.get_json()
+                return redirect('/')
         except Exception as e:
             print(e)
     elif request.method == 'GET':
@@ -108,6 +116,7 @@ def delete_row(id):
                     ''', (id,))
         conn.commit()
     return redirect('/')
+    
 # Route ment for running and stopping deletion.py
 @app.route('/state', methods=['GET', 'POST'])
 def run_slack_app():
@@ -115,9 +124,9 @@ def run_slack_app():
         data = request.get_json()
         if data['set_state'] == 'on':
             global process
-            process = subprocess.Popen('py deletion.py')
             global state
             state = "on"
+            process = subprocess.Popen(['python', 'deletion.py'])
             print(state)
         elif data['set_state'] == 'off':
             try:
@@ -142,12 +151,11 @@ def get_all_data_from_db():
         all_data = cur.fetchall()
     all_data_dict = []
     for row in all_data:
-        channel = {
+        all_data_dict.append({
             'id': row['id'],
             'channel': row['channel'],
             'whitelist': row['whitelist'].split(',')
-        }
-        all_data_dict.append(channel)
+        })
     return all_data_dict
 
 

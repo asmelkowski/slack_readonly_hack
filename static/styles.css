@@ -2,7 +2,12 @@
     margin: 50px auto;
     display: flex;
     justify-content: space-evenly;
+    align-items: center;
     flex-flow: row wrap;
+}
+
+header {
+    text-align: center;
 }
 
 .container>form {
@@ -12,11 +17,25 @@
     align-items: center;
 }
 
-.container>form>* {
-    width: 300px;
-    padding: 5px;
-}
 
 table, th, tr, td {
     border: 1px solid black;
+}
+
+.panel {
+    min-width: 150px;
+    max-width: 300px;
+    margin: 10px;
+}
+
+.panel > *{
+    width: 80%;
+    padding: 5px;
+}
+
+#lists {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
