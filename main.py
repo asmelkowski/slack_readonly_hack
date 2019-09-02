@@ -1,6 +1,7 @@
 import sqlite3
 import subprocess
 import os
+import sys
 import requests
 
 from dotenv import load_dotenv
@@ -126,7 +127,8 @@ def run_slack_app():
             global process
             global state
             state = "on"
-            process = subprocess.Popen(['python', 'deletion.py'])
+            os.environ['PATH'] = '/home/asmelkowski/.virtualenvs/slack_env/bin/' +  os.pathsep + os.environ.get('PATH', '')
+            process = subprocess.Popen(['/home/asmelkowski/.virtualenvs/slack_env/bin/python', 'python deletion.py'])
             print(state)
         elif data['set_state'] == 'off':
             try:
