@@ -17,6 +17,7 @@ def delete_messages(channel_list, whitelisted_users):
                 'token': SLACK_API_KEY,
                 'channel': channel
             })
+            print(messages_history.json())
             for message in messages_history.json()['messages']:
                 if message['user'] not in whitelisted_users:
                     delete_request = requests.post(f"{base_url}chat.delete", data={
@@ -64,28 +65,29 @@ def delete_messages(channel_list, whitelisted_users):
         except KeyError:
             return messages_history.content
 
-while True:
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    cur.execute('''
-                SELECT * FROM channels
-                ''')
-    all_data = cur.fetchall()
-    conn.close()
-    all_data_dict = []
-    for row in all_data:
-        channel = {
-            'id': row['id'],
-            'channel': row['channel'],
-            'whitelist': row['whitelist'].split(',')
-        }
-        all_data_dict.append(channel)
-    for row in all_data_dict:
-        if row['channel'] and row['whitelist']:
-            delete_messages([row['channel']], ",".join(row['whitelist']))
-    time.sleep(5)
+def run_all():
+    while True:
+        conn = sqlite3.connect(DATABASE)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute('''
+                    SELECT * FROM channels
+                    ''')
+        all_data = cur.fetchall()
+        conn.close()
+        all_data_dict = []
+        for row in all_data:
+            channel = {
+                'id': row['id'],
+                'channel': row['channel'],
+                'whitelist': row['whitelist'].split(',')
+            }
+            all_data_dict.append(channel)
+        for row in all_data_dict:
+            if row['channel'] and row['whitelist']:
+                delete_messages([row['channel']], ",".join(row['whitelist']))
+        time.sleep(5)
 
 
-if __name__ == "__main__":
-    delete_messages('CMFNQ0YR0', ['UMT3G1XN0'])
+# if __name__ == "__main__":
+#     delete_messages('CMFNQ0YR0', ['UMT3G1XN0'])

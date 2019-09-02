@@ -49,10 +49,16 @@
             {% endfor %}
         </table>
         <div id="app-control-container" class="panel">
-            <button id="run_app">Run the app</button>
-            <button id="stop_app">Stop the app</button>
+            <form action="state" method="post">
+                <button name="set_state" value="on" type="submit">Run the app</button>
+            </form>
+            <form action="state" method="post">
+                <button name="set_state" value="off" type="submit">Stop the app</button>
+            </form>
         </div>
-        <h1 id="app_state"></h1>
+        {% if app_state %}
+            <h1 id="app_state">App is {{ app_state }}</h1>
+        {% endif %}
     </div>
     <section id="lists">
         <div id="channels-list">
