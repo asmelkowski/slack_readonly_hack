@@ -17,7 +17,6 @@ def delete_messages(channel_list, whitelisted_users):
                 'token': SLACK_API_KEY,
                 'channel': channel
             })
-            print(messages_history.json())
             for message in messages_history.json()['messages']:
                 if message['user'] not in whitelisted_users:
                     delete_request = requests.post(f"{base_url}chat.delete", data={
@@ -53,15 +52,6 @@ def delete_messages(channel_list, whitelisted_users):
                                     })
                     except KeyError as e:
                         pass
-                    # try:
-                    #     reactions = requests.get(f"{base_url}reactions.get", params={
-                    #         'token': SLACK_API_KEY,
-                    #         'channel': channel,
-                    #         'timestamp': message['ts']
-                    #     })
-                    #     print(reactions.content)
-                    # except Exception as e:
-                    #     print(e)
         except KeyError:
             return messages_history.content
 
