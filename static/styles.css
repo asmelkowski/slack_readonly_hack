@@ -17,13 +17,17 @@ header {
     align-items: center;
 }
 
+.container > form > * {
+    margin: 10px;
+}
+
 
 table, th, tr, td {
     border: 1px solid black;
 }
 
 .panel {
-    min-width: 150px;
+    min-width: 200px;
     max-width: 300px;
     margin: 10px;
 }
@@ -38,4 +42,12 @@ table, th, tr, td {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#checkbox {
+    min-width: 250px;
+    max-width: 300px;
+    min-height: 150px;
+    max-height: 200px;
+    overflow: scroll;
 }

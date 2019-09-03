@@ -91,7 +91,7 @@ def handle_data():
         try:
             with app.app_context():
                 channel = request.form['channels']
-                whitelist = request.form['whitelist']
+                whitelist = ",".join([x for x in request.form.keys() if x != 'channels'])
                 conn = get_db()
                 conn.row_factory = sqlite3.Row
                 cur = conn.cursor()
@@ -119,6 +119,7 @@ def handle_data():
                 return redirect('/')
         except Exception as e:
             print(e)
+            return redirect("/")
     elif request.method == 'GET':
         create_table()
         all_data_dict = get_all_data_from_db()
