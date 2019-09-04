@@ -11,6 +11,21 @@
 </head>
 
 <body>
+    <div class="edit-panel">
+        <button id="exit-btn">
+            <div id="exit">
+                <span></span>
+            </div>
+        </button>
+        <form action="/channels/update" method="POST">
+            <input type="hidden" value="" name="id">
+            <label for="channel">Channel:</label>
+            <input type="text" name="channels" readonly="readonly">
+            <label for="whitelist">Whitelist:</label>
+            <input type="text" name="whitelist" autocomplete="off">
+            <input type="submit">
+        </form>
+    </div>
     <header>
         <h1>Slack read only hack</h1>
         <h2><a target='_blank' href="https://{{ workspaces.domain }}.slack.com">{{ workspaces.name }}</a></h2>
@@ -18,7 +33,12 @@
     <div class="container">
         <form id="add_channel" class="panel" action="channels" method="POST">
             <label for="channel">Chanel id</label>
+<<<<<<< Updated upstream
             <input type="text" name="channels" placeholder="Chanel id" list='channel_list' required/>
+=======
+            <input type="text" name="channels" placeholder="Chanel id" list='channel_list' required
+                autocomplete="off" />
+>>>>>>> Stashed changes
             <datalist id="channel_list">
                 {% for channel in channels %}
                 <option value="{{ channel.id }}">{{ channel.name }}</option>
@@ -41,10 +61,11 @@
             </tr>
             {% for row in all_data_dict %}
             <tr>
-                <td>{{ row.id }}</td>
-                <td>{{ row.channel }}</td>
-                <td>{{ row.whitelist|join(", ") }}</td>
+                <td class="row_id">{{ row.id }}</td>
+                <td class="row_channel">{{ row.channel }}</td>
+                <td class="row_whitelist">{{ row.whitelist|join(", ") }}</td>
                 <td><a href="/delete/{{ row.id }}">Delete</a></td>
+                <td><button id="edit-btn">Edit</button></td>
             </tr>
             {% endfor %}
         </table>
@@ -52,22 +73,28 @@
             <button id="run_app">Run the app</button>
             <button id="stop_app">Stop the app</button>
         </div>
+<<<<<<< Updated upstream
         <h1 id="app_state"></h1>
+=======
+        {% if app_state %}
+        <h1 id="app_state">App is {{ app_state }}</h1>
+        {% endif %}
+>>>>>>> Stashed changes
     </div>
     <section id="lists">
         <div id="channels-list">
             <h1>Channel list:</h1>
             <ol>
                 {% for channel in channels %}
-                    <li><strong>Name:</strong> {{ channel.name }} <strong>ID:</strong> {{ channel.id }}</li>
+                <li><strong>Name:</strong> {{ channel.name }} <strong>ID:</strong> {{ channel.id }}</li>
                 {% endfor %}
             </ol>
         </div>
-        <div id="users-list">   
+        <div id="users-list">
             <h1>Users list:</h1>
             <ol>
                 {% for user in users %}
-                    <li><strong>Name:</strong> {{ user.name }} <strong>ID:</strong> {{ user.id }}</li>
+                <li><strong>Name:</strong> {{ user.name }} <strong>ID:</strong> {{ user.id }}</li>
                 {% endfor %}
             </ol>
         </div>

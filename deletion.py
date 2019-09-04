@@ -11,6 +11,7 @@ base_url = 'https://slack.com/api/'
 DATABASE = 'database.db'
 
 def delete_messages(channel_list, whitelisted_users):
+    print(f"Channel list: {channel_list}, whitelist: {whitelisted_users}")
     for channel in channel_list:
         try:
             messages_history = requests.get(f"{base_url}conversations.history", params={
@@ -64,6 +65,7 @@ def delete_messages(channel_list, whitelisted_users):
         except KeyError:
             return messages_history.content
 
+<<<<<<< Updated upstream
 while True:
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
@@ -85,6 +87,30 @@ while True:
         if row['channel'] and row['whitelist']:
             delete_messages([row['channel']], ",".join(row['whitelist']))
     time.sleep(5)
+=======
+def run_all():
+    while True:
+        conn = sqlite3.connect(DATABASE)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute('''
+                    SELECT * FROM channels
+                    ''')
+        all_data = cur.fetchall()
+        conn.close()
+        all_data_dict = []
+        for row in all_data:
+            channel = {
+                'id': row['id'],
+                'channels': row['channel'].split(','),
+                'whitelist': row['whitelist'].split(',')
+            }
+            all_data_dict.append(channel)
+        for row in all_data_dict:
+            if row['channels'] and row['whitelist']:
+                delete_messages(row['channels'], ",".join(row['whitelist']))
+        time.sleep(5)
+>>>>>>> Stashed changes
 
 
 if __name__ == "__main__":

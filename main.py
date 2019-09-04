@@ -106,6 +106,28 @@ def handle_data():
         all_data_dict = get_all_data_from_db()
         return jsonify(all_data_dict)
 
+@app.route('/channels/update', methods=["POST"])
+def update_channel():
+    if request.method == "POST":
+        try:
+            row_id = request.form['id']
+            row_channel = request.form['channels']
+            try:
+                row_whitelist = request.form['whitelist']
+            except KeyError:
+                row_whitelist = []
+            with app.app_context():
+                conn = get_db()
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+                cur.execute('''
+                            UPDATE channels SET whitelist = ?
+                            WHERE id = ?''', (row_whitelist, row_id))
+                conn.commit()
+                conn.close()
+        except Exception as e:
+            print(e)
+    return redirect("/")
 
 @app.route('/delete/<id>', methods=['GET'])
 def delete_row(id):

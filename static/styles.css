@@ -38,4 +38,87 @@ table, th, tr, td {
     display: flex;
     justify-content: center;
     align-items: center;
+<<<<<<< Updated upstream
+=======
+}
+
+#checkbox {
+    min-width: 250px;
+    max-width: 300px;
+    min-height: 150px;
+    max-height: 200px;
+    overflow: scroll;
+}
+
+.edit-panel {
+/*   margin: 0 auto; */
+    width: 300px;
+    position: absolute;
+    left: 50%;
+    margin-left: -150px;
+    top: -300px;
+    transition: transform .2s .2s ease-in-out;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #3f3f3f;
+    color: white;
+}
+
+.edit-panel form {
+    display: flex;
+    flex-flow: column;
+}
+
+.edit-panel form > * {
+    margin: 5px;
+}
+
+.edit-panel form input[type='text'] {
+    padding: 10px;
+}
+
+.edit-panel__active {
+    transform: translateY(400px);
+    z-index: 999;
+}
+
+#exit-btn {
+    padding: 5px;
+    display: inline-block;
+    cursor: pointer;
+    background-color: transparent;
+    border: 0;
+    margin: 0;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+#exit-btn #exit {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    position: relative;
+}
+
+#exit-btn #exit span {
+    top: 50%;
+    right: 5px;
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    position: absolute;
+    transform: translateX(-50%);
+    transform: rotate(45deg);
+}
+
+#exit-btn #exit span::after {
+    content: "";
+    right: 0;
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    position: absolute;
+    transform: rotate(-90deg);
+>>>>>>> Stashed changes
 }
