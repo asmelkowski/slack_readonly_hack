@@ -33,24 +33,22 @@
     <div class="container">
         <form id="add_channel" class="panel" action="channels" method="POST">
             <label for="channel">Chanel id</label>
-<<<<<<< Updated upstream
-            <input type="text" name="channels" placeholder="Chanel id" list='channel_list' required/>
-=======
-            <input type="text" name="channels" placeholder="Chanel id" list='channel_list' required
-                autocomplete="off" />
->>>>>>> Stashed changes
+            <input type="text" name="channels" placeholder="Chanel id" list='channel_list' required autocomplete="off"/>
             <datalist id="channel_list">
                 {% for channel in channels %}
                 <option value="{{ channel.id }}">{{ channel.name }}</option>
                 {% endfor %}
             </datalist>
-            <label for="whitelist">List of whitedlisted users (separated with comma)</label>
-            <input type="text" name="whitelist" placeholder="Whitelisted users ids (comma separated)" list='users_list'/>
-            <datalist id="users_list">
-                    {% for user in users %}
-                    <option value="{{ user.id }}">{{ user.name }}</option>
-                    {% endfor %}
-                </datalist>
+            <label for="whitelist">List of whitelisted users</label>
+            <input type="text" id="filter_input" placeholder="Filter" autocomplete="off">
+            <div id="checkbox">
+                {% for user in users %}
+                <div class="checkbox-option">
+                    <input type="checkbox" id="{{ user.name }}" name="{{ user.id }}">
+                    <label for="{{ user.name }}">{{ user.name }}</label>
+                </div>
+                {% endfor %}
+            </div>
             <button type="submit" id='submit-btn'>Add</button>
         </form>
         <table class="panel" id="table">
@@ -70,16 +68,16 @@
             {% endfor %}
         </table>
         <div id="app-control-container" class="panel">
-            <button id="run_app">Run the app</button>
-            <button id="stop_app">Stop the app</button>
+            <form action="state" method="post">
+                <button name="set_state" value="on" type="submit">Run the app</button>
+            </form>
+            <form action="state" method="post">
+                <button name="set_state" value="off" type="submit">Stop the app</button>
+            </form>
         </div>
-<<<<<<< Updated upstream
-        <h1 id="app_state"></h1>
-=======
         {% if app_state %}
         <h1 id="app_state">App is {{ app_state }}</h1>
         {% endif %}
->>>>>>> Stashed changes
     </div>
     <section id="lists">
         <div id="channels-list">

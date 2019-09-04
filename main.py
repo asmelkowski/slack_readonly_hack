@@ -1,17 +1,18 @@
 import sqlite3
-import subprocess
 import os
 import sys
 import requests
+import multiprocessing as mp
 
 from dotenv import load_dotenv
+from deletion import run_all
 from flask import Flask, render_template, request, g, Response, jsonify, redirect
 
 app = Flask(__name__)
 # Load API KEY stored in .env file (not ment for git tracking)
 DATABASE = 'database.db'
 process = None
-state = 'off'
+os.environ["APP_STATE"] = "off"
 
 load_dotenv()
 # Load API KEY stored in .env file (not ment for git tracking)
@@ -78,7 +79,7 @@ def index():
                 'name': name
             })
         all_data_dict = get_all_data_from_db()
-        return render_template('index.html', all_data_dict=all_data_dict, workspaces=auth_workspaces, channels=channels_dict, users=users_dict)
+        return render_template('index.html', all_data_dict=all_data_dict, workspaces=auth_workspaces, channels=channels_dict, users=users_dict, app_state=os.environ["APP_STATE"])
     except KeyError as e:
         return jsonify({
             'error': f"KeyError: {e}. Check Your .env file"
@@ -90,17 +91,35 @@ def handle_data():
         try:
             with app.app_context():
                 channel = request.form['channels']
-                whitelist = request.form['whitelist']
+                whitelist = ",".join([x for x in request.form.keys() if x != 'channels'])
                 conn = get_db()
                 conn.row_factory = sqlite3.Row
                 cur = conn.cursor()
                 cur.execute('''
-                    INSERT INTO channels (channel, whitelist)
-                    VALUES (?,?)''', (channel, whitelist))
-                conn.commit()
+                            SELECT * FROM channels WHERE channel = (?)
+                            ''', (channel,))
+                search_result = cur.fetchall()
+                if search_result and whitelist != "":
+                    if search_result[0]['whitelist'] == "":
+                        new_whitelist = whitelist
+                    else:
+                        new_whitelist = search_result[0]['whitelist'] + f", {whitelist}"
+                    cur.execute('''
+                                UPDATE channels SET whitelist = ?
+                                WHERE id = ?''', (new_whitelist, search_result[0]['id']))
+                    conn.commit()
+                elif search_result and whitelist == "":
+                    pass
+                else:
+                    cur.execute('''
+                        INSERT INTO channels (channel, whitelist)
+                        VALUES (?,?)''', (channel, whitelist))
+                    conn.commit()
+                conn.close()
                 return redirect('/')
         except Exception as e:
             print(e)
+            return redirect("/")
     elif request.method == 'GET':
         create_table()
         all_data_dict = get_all_data_from_db()
@@ -138,29 +157,32 @@ def delete_row(id):
                     DELETE FROM channels WHERE id=? 
                     ''', (id,))
         conn.commit()
+        conn.close()
     return redirect('/')
     
 # Route ment for running and stopping deletion.py
 @app.route('/state', methods=['GET', 'POST'])
 def run_slack_app():
     if request.method == 'POST':
-        data = request.get_json()
-        if data['set_state'] == 'on':
-            global process
-            global state
-            state = "on"
-            os.environ['PATH'] = '/home/asmelkowski/.virtualenvs/slack_env/bin/' +  os.pathsep + os.environ.get('PATH', '')
-            process = subprocess.Popen(['/home/asmelkowski/.virtualenvs/slack_env/bin/python', 'python deletion.py'])
-            print(state)
-        elif data['set_state'] == 'off':
+        data = request.form['set_state']
+        if data == 'on':
             try:
-                process.kill()
-                state = "off"
-                print(state)
-            except NameError as e:
+                global process
+                process = mp.Process(target=run_all)
+                process.start()
+            except Exception as e:
                 print(e)
-                print("Proccess was not running")
-    return jsonify({'current_state': state})
+            finally:
+                os.environ['APP_STATE'] = 'on'
+        elif data == 'off':
+            try:
+                process.terminate()
+            except Exception as e:
+                print(e)
+            finally:
+                os.environ['APP_STATE'] = 'off'
+        return redirect("/")
+    return jsonify({'current_state': os.environ['APP_STATE']})
 
 
 def get_all_data_from_db():
