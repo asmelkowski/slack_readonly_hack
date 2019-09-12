@@ -15,7 +15,8 @@ def delete_messages(channel_list, whitelisted_users):
         try:
             messages_history = requests.get(f"{base_url}conversations.history", params={
                 'token': SLACK_API_KEY,
-                'channel': channel
+                'channel': channel,
+                'limit': 999
             })
             for message in messages_history.json()['messages']:
                 if message['user'] not in whitelisted_users:
