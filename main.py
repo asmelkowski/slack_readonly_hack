@@ -9,7 +9,6 @@ from deletion import run_all
 from flask import Flask, render_template, request, g, Response, jsonify, redirect
 
 app = Flask(__name__)
-# Load API KEY stored in .env file (not ment for git tracking)
 DATABASE = 'database.db'
 process = None
 os.environ["APP_STATE"] = "off"
@@ -20,13 +19,12 @@ SLACK_API_KEY = os.getenv('SLACK_API_KEY')
 base_url = 'https://slack.com/api/'
 
 # Function that initiates database
-
-
 def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-    return db
+    with app.open_resource(DATABASE):
+        db = getattr(g, '_database', None)
+        if db is None:
+            db = g._database = sqlite3.connect(DATABASE)
+        return db
 
 # Closes db connection when context is done
 @app.teardown_appcontext
@@ -34,9 +32,8 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+
 # Creates table "channels" if it doesn't exists
-
-
 def create_table():
     with app.app_context():
         get_db().execute('''
@@ -52,37 +49,26 @@ def index():
         workspace_users = requests.get(f"{base_url}users.list", params={
             'token': SLACK_API_KEY
         }).json()
-        users_name_list = [x['name'] for x in workspace_users['members']]
-        users_id_list = [x['id'] for x in workspace_users['members']]
-        workspace_users = zip(users_id_list, users_name_list)
-        users_dict = []
-        for id, name in workspace_users:
-            users_dict.append({
-                'id': id,
-                'name': name
-            })
+        users = []
+        for user in workspace_users['members']:
+           if not user['deleted']:
+               users.append(user)
 
         auth_workspaces = requests.get(f"{base_url}team.info", params={
             'token': SLACK_API_KEY
         }).json()['team']
 
         conversation_list = requests.get(f"{base_url}conversations.list", params={
-            'token': SLACK_API_KEY
-        }).json()
-        channels_ids = [x['id'] for x in conversation_list['channels']]
-        channels_names = [x['name'] for x in conversation_list['channels']]
-        conversation_list = zip(channels_ids, channels_names)
-        channels_dict = []
-        for id, name in conversation_list:
-            channels_dict.append({
-                'id': id,
-                'name': name
-            })
+            'token': SLACK_API_KEY,
+            'limit': 999,
+            'exclude_archived': True,
+        }).json()['channels']
+
         all_data_dict = get_all_data_from_db()
-        return render_template('index.html', all_data_dict=all_data_dict, workspaces=auth_workspaces, channels=channels_dict, users=users_dict, app_state=os.environ["APP_STATE"])
-    except KeyError as e:
+        return render_template('index.html', all_data_dict=all_data_dict, workspaces=auth_workspaces, channels=conversation_list, users=users, app_state=os.environ["APP_STATE"])
+    except Exception as e:
         return jsonify({
-            'error': f"KeyError: {e}. Check Your .env file"
+            'error': f"Exception: {e}. Check Your .env file"
         })
 
 @app.route('/channels', methods=['GET', 'POST'])
