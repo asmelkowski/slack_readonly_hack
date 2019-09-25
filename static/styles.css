@@ -43,6 +43,7 @@ table tbody tr:nth-child(even) {
 
 #checkbox {
     margin-top: 10px;
+    font-size: .8rem;
 }
 
 #checkbox input {

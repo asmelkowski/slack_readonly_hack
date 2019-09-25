@@ -55,7 +55,7 @@ def delete_messages(channel_list, whitelisted_users):
         except KeyError:
             return messages_history.content
 
-def run_all():
+def run_all(DATABASE):
     while True:
         conn = sqlite3.connect(DATABASE)
         conn.row_factory = sqlite3.Row

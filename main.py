@@ -8,12 +8,13 @@ from dotenv import load_dotenv
 from deletion import run_all
 from flask import Flask, render_template, request, g, Response, jsonify, redirect
 
+load_dotenv()
 app = Flask(__name__)
 DATABASE = os.path.join(app.root_path, 'database.db')
-process = None
-os.environ["APP_STATE"] = "off"
+process = mp.Process(target=run_all, args=(DATABASE,))
+process.start()
+os.environ["APP_STATE"] = "on"
 
-load_dotenv()
 # Load API KEY stored in .env file (not ment for git tracking)
 SLACK_API_KEY = os.getenv('SLACK_API_KEY')
 base_url = 'https://slack.com/api/'
@@ -154,8 +155,11 @@ def run_slack_app():
         if data == 'on':
             try:
                 global process
-                process = mp.Process(target=run_all)
-                process.start()
+                if not process.is_alive():
+                    process = mp.Process(target=run_all, args=(DATABASE,))
+                    process.start()
+                else:
+                    print("Process is already running")
             except Exception as e:
                 print(e)
             finally:
@@ -169,6 +173,7 @@ def run_slack_app():
                 os.environ['APP_STATE'] = 'off'
         return redirect("/")
     return jsonify({'current_state': os.environ['APP_STATE']})
+
 
 
 def get_all_data_from_db():
@@ -190,6 +195,16 @@ def get_all_data_from_db():
         })
     return all_data_dict
 
+def run_deletion(process):
+    if process.is_alive():
+        print("Process is already on!")
+        return "on"
+    elif not process.is_alive():
+        process.start()
+        if process.is_alive():
+            return "on"
+        else:
+            print("Something went wrong")
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=5000)
