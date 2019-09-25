@@ -12,9 +12,9 @@ header {
 .container {
     padding: 5%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 500px));
-    /* justify-items: center; */
-    align-items: start;
+    grid-template-columns: repeat(auto-fill, minmax(400px , 450px));
+    justify-items: center;
+    align-items: center;
     gap: 10px;
 }
 
@@ -139,3 +139,10 @@ li {
 #users-list { 
     margin-bottom: 10%;
 }
+
+section#lists {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+  }

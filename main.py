@@ -9,7 +9,7 @@ from deletion import run_all
 from flask import Flask, render_template, request, g, Response, jsonify, redirect
 
 app = Flask(__name__)
-DATABASE = f"{app.root_path}\database.db"
+DATABASE = os.path.join(app.root_path, 'database.db')
 process = None
 os.environ["APP_STATE"] = "off"
 
