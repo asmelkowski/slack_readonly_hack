@@ -9,7 +9,7 @@ from deletion import run_all
 from flask import Flask, render_template, request, g, Response, jsonify, redirect
 
 app = Flask(__name__)
-DATABASE = 'database.db'
+DATABASE = f"{app.root_path}\database.db"
 process = None
 os.environ["APP_STATE"] = "off"
 
@@ -20,11 +20,10 @@ base_url = 'https://slack.com/api/'
 
 # Function that initiates database
 def get_db():
-    with app.open_resource(DATABASE):
-        db = getattr(g, '_database', None)
-        if db is None:
-            db = g._database = sqlite3.connect(DATABASE)
-        return db
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
 
 # Closes db connection when context is done
 @app.teardown_appcontext
@@ -41,7 +40,6 @@ def create_table():
                                                     channel TEXT,
                                                     whitelist TEXT);
             ''')
-
 
 @app.route('/')
 def index():
@@ -77,7 +75,9 @@ def handle_data():
         try:
             with app.app_context():
                 channel = request.form['channels']
-                whitelist = ",".join([x for x in request.form.keys() if x != 'channels'])
+                whitelist = ",".join(request.form.getlist('users_checkbox'))
+                if not whitelist:
+                    whitelist = request.form['whitelist']
                 conn = get_db()
                 conn.row_factory = sqlite3.Row
                 cur = conn.cursor()

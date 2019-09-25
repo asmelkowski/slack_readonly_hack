@@ -1,80 +1,57 @@
-.container {
-    margin: 50px auto;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    flex-flow: row wrap;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 header {
+    margin: 0 auto;
     text-align: center;
 }
 
-.container>form {
-    display: flex;
-    flex-flow: column;
-    justify-content: center;
-    align-items: center;
+.container {
+    padding: 5%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 500px));
+    /* justify-items: center; */
+    align-items: start;
+    gap: 10px;
 }
 
-.container>form>* {
-    margin: 10px;
-}
-
-
-table,
-th,
-tr,
-td {
-    border: 1px solid black;
-}
-
-.panel {
-    min-width: 200px;
-    max-width: 300px;
-    margin: 10px;
-}
-
-.panel>* {
-    width: 80%;
-    padding: 5px;
-}
-
-#lists {
+.container > * {
+    height: 350px;
     width: 100%;
     display: flex;
-    justify-content: center;
+    flex-flow: column;
     align-items: center;
+    padding: 5% 3%;
+    border-radius: 5px;
+    background: rgba(242, 137, 80, 0.1);
+}
+
+.container > form#add_channel > input {
+    width: 100%;
+}
+
+table tbody tr td {
+    padding: 1px 10px;
+}
+
+table tbody tr:nth-child(even) {
+    background: rgba(65, 65, 65, 0.39);
 }
 
 #checkbox {
-    min-width: 200px;
-    max-width: 600px;
-    padding: 0 10px;
-    min-height: 150px;
-    max-height: 300px;
-    overflow: scroll;
+    margin-top: 10px;
 }
 
-#checkbox .checkbox-option {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    border-radius: 5px;
-    margin-bottom: 5px;
+#checkbox input {
+    width: 100%;
 }
 
-#checkbox .checkbox-option:nth-child(odd) {
-    background-color: rgba(170, 170, 170, 0.5)
+form#add_channel.panel div#checkbox table {
+    margin-bottom: 15px;
 }
-
-#checkbox span.email {
-    font-size: 0.8rem;
-    text-justify: right;
-}
-
-
 
 .edit-panel {
     /*   margin: 0 auto; */
@@ -146,3 +123,19 @@ td {
     background-color: white;
     position: absolute;
     transform: rotate(-90deg);
+}
+
+section#lists {
+    width: 70%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+li {
+    list-style: none;
+}
+
+#users-list { 
+    margin-bottom: 10%;
+}

@@ -2,11 +2,11 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Slack App Web Gui</title>
-    <link rel="stylesheet" href="static/styles.css">
+    <link rel="stylesheet" href="static/styles.css" />
     <script src="static/scripts.js"></script>
 </head>
 
@@ -18,22 +18,26 @@
             </div>
         </button>
         <form action="/channels/update" method="POST">
-            <input type="hidden" value="" name="id">
+            <input type="hidden" value="" name="id" />
             <label for="channel">Channel:</label>
-            <input type="text" name="channels" readonly="readonly">
+            <input type="text" name="channels" readonly="readonly" />
             <label for="whitelist">Whitelist:</label>
-            <input type="text" name="whitelist" autocomplete="off">
-            <input type="submit">
+            <input type="text" name="whitelist" autocomplete="off" />
+            <input type="submit" />
         </form>
     </div>
     <header>
         <h1>Slack read only hack</h1>
-        <h2><a target='_blank' href="https://{{ workspaces.domain }}.slack.com">{{ workspaces.name }}</a></h2>
+        <h2>
+            <a target="_blank" href="https://{{ workspaces.domain }}.slack.com">{{
+          workspaces.name
+        }}</a>
+        </h2>
     </header>
     <div class="container">
         <form id="add_channel" class="panel" action="channels" method="POST">
             <label for="channel">Chanel id</label>
-            <input type="text" name="channels" placeholder="Chanel id" list='channel_list' required
+            <input type="text" name="channels" placeholder="Chanel id" list="channel_list" required
                 autocomplete="off" />
             <datalist id="channel_list">
                 {% for channel in channels %}
@@ -41,21 +45,22 @@
                 {% endfor %}
             </datalist>
             <label for="whitelist">List of whitelisted users</label>
-            <input type="text" id="filter_input" placeholder="Filter" autocomplete="off">
+            <input type="text" id="whitelist" name="whitelist" placeholder="List of whitelisted users" />
             <div id="checkbox">
-                {% for user in users %}
-                <div class="checkbox-option">
-                    <input type="checkbox" id="{{ user.name }}" name="{{ user.id }}">
-                    <label for="{{ user.name }}">{{ user.name }}
-                        {% if user.profile.email %}
-                        <br>
-                        <span class="email">{{ user.profile.email|lower }}</span>
-                        {% endif %}
-                    </label>
-                </div>
-                {% endfor %}
+                <input type="text" id="filter_input" placeholder="Filter" autocomplete="off" />
+                <table>
+                    {% for user in users %}
+                    <tr class="checkbox-option">
+                        <td>
+                            <input type="checkbox" id="{{ user.name }}" name="users_checkbox" value="{{ user.id }}" />
+                        </td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.profile.email | lower }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
             </div>
-            <button type="submit" id='submit-btn'>Add</button>
+            <button type="submit" id="submit-btn">Add</button>
         </form>
         <table class="panel" id="table">
             <tr>
@@ -73,14 +78,18 @@
             </tr>
             {% endfor %}
         </table>
+
         <div id="app-control-container" class="panel">
             <form action="state" method="post">
                 <button name="set_state" value="on" type="submit">Run the app</button>
             </form>
             <form action="state" method="post">
-                <button name="set_state" value="off" type="submit">Stop the app</button>
+                <button name="set_state" value="off" type="submit">
+                    Stop the app
+                </button>
             </form>
         </div>
+
         {% if app_state %}
         <h1 id="app_state">App is {{ app_state }}</h1>
         {% endif %}
@@ -90,17 +99,30 @@
             <h1>Channel list:</h1>
             <ol>
                 {% for channel in channels %}
-                <li><strong>Name:</strong> {{ channel.name }} <strong>ID:</strong> {{ channel.id }}</li>
+                <li>
+                    <strong>Name:</strong> {{ channel.name }} <strong>ID:</strong>
+                    {{ channel.id }}
+                </li>
                 {% endfor %}
             </ol>
         </div>
         <div id="users-list">
             <h1>Users list:</h1>
-            <ol>
+            <table id="users-table">
+                <tr>
+                    <th>Name:</th>
+                    <th>ID:</th>
+                    <th>Email:</th>
+                </tr>
+
                 {% for user in users %}
-                <li><strong>Name:</strong> {{ user.name }} <strong>ID:</strong> {{ user.id }}</li>
+                <tr>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.profile.email }}</td>
+                </tr>
                 {% endfor %}
-            </ol>
+            </table>
         </div>
     </section>
 </body>
